@@ -55,30 +55,35 @@ namespace ProductManageApi.Controllers
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteProduct(int id)
         {
-            await _repository.DeleteProductAsync(id);
+            await _repository.DeleteProductByIdAsync(id);
             return NoContent();
         }
 
         [HttpPut("decrement-stock/{id}/{quantity}")]
         public async Task<IActionResult> DecrementStock(int id, int quantity)
         {
-            var success = await _repository.DecrementStockAsync(id, quantity);
-            if (!success)
+            var updatedStock = await _repository.DecrementStockAsync(id, quantity);
+            if (updatedStock == null)
             {
-                return NotFound();
+                return NotFound("Product not found.");
             }
-            return Ok();
+            if (updatedStock < quantity)
+            {
+                return BadRequest($"Insufficient stock. Available: {updatedStock}");
+            }
+            return Ok(new { StockAvailable = updatedStock });
         }
+
 
         [HttpPut("add-to-stock/{id}/{quantity}")]
         public async Task<IActionResult> AddToStock(int id, int quantity)
         {
-            var success = await _repository.AddToStockAsync(id, quantity);
-            if (!success)
+            var updatedStock = await _repository.AddToStockAsync(id, quantity);
+            if (updatedStock == null)
             {
-                return NotFound();
+                return NotFound("Product not found.");
             }
-            return Ok();
+            return Ok(new { StockAvailable = updatedStock });
         }
     }
 }

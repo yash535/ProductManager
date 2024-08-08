@@ -7,14 +7,14 @@ var builder = WebApplication.CreateBuilder(args);
 // Add services to the container.
 builder.Services.AddControllers();
 
-// Configure Entity Framework Core with transient error resiliency
+// Error Handle
 builder.Services.AddDbContext<ProductContext>(options =>
     options.UseSqlServer(
         builder.Configuration.GetConnectionString("DefaultConnection"),
         sqlOptions => sqlOptions.EnableRetryOnFailure(
             maxRetryCount: 5, // Number of retry attempts
-            maxRetryDelay: TimeSpan.FromSeconds(10), // Delay between retries
-            errorNumbersToAdd: null // Add specific SQL error numbers to retry on, or leave null for default
+            maxRetryDelay: TimeSpan.FromSeconds(10),
+            errorNumbersToAdd: null 
         )));
 
 // Register repository services

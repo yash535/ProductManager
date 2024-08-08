@@ -1,6 +1,8 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using ProductManageApi.Data;
 using ProductManageApi.Models;
+using System.Collections.Generic;
+using System.Threading.Tasks;
 
 namespace ProductManageApi.Repositories
 {
@@ -18,7 +20,7 @@ namespace ProductManageApi.Repositories
             return await _context.Products.ToListAsync();
         }
 
-        public async Task<Product> GetProductByIdAsync(int id)
+        public async Task<Product?> GetProductByIdAsync(int id)
         {
             return await _context.Products.FindAsync(id);
         }
@@ -35,38 +37,44 @@ namespace ProductManageApi.Repositories
             await _context.SaveChangesAsync();
         }
 
-        public async Task DeleteProductAsync(int id)
+        public async Task DeleteProductByIdAsync(int id)
         {
-            var product = await _context.Products.FindAsync(id);
-            if (product != null)
-            {
-                _context.Products.Remove(product);
-                await _context.SaveChangesAsync();
-            }
+            Product? product = await GetProductByIdAsync(id);
+            if (product is null) return;
+
+            _context.Products.Remove(product);
+            await _context.SaveChangesAsync();
         }
 
-        public async Task<bool> DecrementStockAsync(int id, int quantity)
+        public async Task<int?> DecrementStockAsync(int id, int quantity)
         {
-            var product = await _context.Products.FindAsync(id);
-            if (product != null && product.StockAvailable >= quantity)
+            var product = await GetProductByIdAsync(id);
+            if (product is null)
             {
-                product.StockAvailable -= quantity;
-                await _context.SaveChangesAsync();
-                return true;
+                return null;
             }
-            return false;
+
+            if (product.StockAvailable < quantity)
+            {
+                return product.StockAvailable;
+            }
+
+            product.StockAvailable -= quantity;
+            await _context.SaveChangesAsync();
+            return product.StockAvailable;
         }
 
-        public async Task<bool> AddToStockAsync(int id, int quantity)
+        public async Task<int?> AddToStockAsync(int id, int quantity)
         {
-            var product = await _context.Products.FindAsync(id);
-            if (product != null)
+            var product = await GetProductByIdAsync(id);
+            if (product is null)
             {
-                product.StockAvailable += quantity;
-                await _context.SaveChangesAsync();
-                return true;
+                return null;
             }
-            return false;
+
+            product.StockAvailable += quantity;
+            await _context.SaveChangesAsync();
+            return product.StockAvailable;
         }
     }
 }
