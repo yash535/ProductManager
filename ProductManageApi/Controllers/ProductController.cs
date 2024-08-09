@@ -26,14 +26,14 @@ namespace ProductManageApi.Controllers
         [HttpGet]
         public async Task<IActionResult> GetAllProducts()
         {
-            var products = await _repository.GetAllProductsAsync();
+            List<Product> products = await _repository.GetAllProductsAsync();
             return Ok(products);
         }
 
         [HttpGet("{id}")]
         public async Task<IActionResult> GetProductById(int id)
         {
-            var product = await _repository.GetProductByIdAsync(id);
+            Product? product = await _repository.GetProductByIdAsync(id);
             if (product == null)
             {
                 return NotFound();
@@ -62,7 +62,7 @@ namespace ProductManageApi.Controllers
         [HttpPut("decrement-stock/{id}/{quantity}")]
         public async Task<IActionResult> DecrementStock(int id, int quantity)
         {
-            var updatedStock = await _repository.DecrementStockAsync(id, quantity);
+            int? updatedStock = await _repository.DecrementStockAsync(id, quantity);
             if (updatedStock == null)
             {
                 return NotFound("Product not found.");
@@ -78,7 +78,7 @@ namespace ProductManageApi.Controllers
         [HttpPut("add-to-stock/{id}/{quantity}")]
         public async Task<IActionResult> AddToStock(int id, int quantity)
         {
-            var updatedStock = await _repository.AddToStockAsync(id, quantity);
+            int? updatedStock = await _repository.AddToStockAsync(id, quantity);
             if (updatedStock == null)
             {
                 return NotFound("Product not found.");
